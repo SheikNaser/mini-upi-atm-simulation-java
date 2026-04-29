@@ -1,4 +1,4 @@
-# 💳 Mini UPI / ATM Simulation (Java)
+#  Mini UPI / ATM Simulation (Java)
 
 Description
 
