@@ -1,10 +1,18 @@
+/*
+ * Mini UPI / ATM Simulation
+ * Features:
+ * - PIN-based authentication
+ * - Deposit, Withdraw, Balance enquiry
+ * - Menu-driven console application
+ */
+
 import java.util.*;
 class MINIUPI
 {
 	static Scanner sc = new Scanner(System.in);
 	float balance;
 	int PIN;
-
+// Generate a random 4-digit PIN for the session
 	int GENPIN()
 	{
 		Random r = new Random();
@@ -12,7 +20,7 @@ class MINIUPI
 		System.out.println("YOUR PIN IS : "+PIN);
 		return PIN;
 	}
-
+// Verify user-entered PIN before allowing transaction
 	boolean AUTHENTICATE()
 	{
 		System.out.println("Enter 4 digit PIN");
@@ -28,7 +36,7 @@ class MINIUPI
 			return false;
 		}
 	}
-
+// Add amount to balance only if authentication is successful
 	float Deposit(float a)
 	{
 
@@ -48,7 +56,7 @@ class MINIUPI
 
 
 	}
-
+// Check for sufficient balance before deducting amount
 	float Withdraw(float a)
 	{
 		if(AUTHENTICATE())
@@ -73,7 +81,7 @@ class MINIUPI
 			return balance;
 		}
 	}
-
+// Display current balance after successful authentication
 	float BalanceEnquiry()
 	{
 		if(AUTHENTICATE())
@@ -88,7 +96,7 @@ class MINIUPI
 			return balance;
 		}
 	}
-
+// Displays menu options and handles user choice using switch-case
 	void Display()
 	{
 		System.out.println("Enter your choice");
@@ -123,10 +131,12 @@ class MINIUPI
 				}
 			}
 	}
-
+// Repeat transactions until user chooses to exit
 		public static void main(String [] args)
 		{
 			MINIUPI x = new MINIUPI();
+			// Generate session PIN at start of program
+			x.GENPIN();
 			x.GENPIN();
 
 			int a;
