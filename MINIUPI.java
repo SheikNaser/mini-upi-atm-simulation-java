@@ -137,7 +137,6 @@ class MINIUPI
 			MINIUPI x = new MINIUPI();
 			// Generate session PIN at start of program
 			x.GENPIN();
-			x.GENPIN();
 
 			int a;
 			do
