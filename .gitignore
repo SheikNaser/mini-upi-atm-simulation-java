@@ -1,0 +1,17 @@
+# IntelliJ / Android Studio
+.idea/
+*.iml
+
+# Build files
+out/
+build/
+
+# Logs
+*.log
+
+# Compiled files
+*.class
+
+# OS files
+.DS_Store
+Thumbs.db
