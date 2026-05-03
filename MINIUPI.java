@@ -1,152 +1,288 @@
-/*
- * Mini UPI / ATM Simulation
- * Features:
- * - PIN-based authentication
- * - Deposit, Withdraw, Balance enquiry
- * - Menu-driven console application
- */
+// ==============================
+// MINI BANKING SYSTEM (v2.0)
+//
+// Features:
+// - PIN authentication for all operations
+// - Mobile number verification for secure transactions
+// - OTP-based confirmation for deposits and high-value withdrawals
+// - Conditional OTP for withdrawals greater than 2000
+// - Menu-driven user interaction
+// ==============================
 
 import java.util.*;
+
 class MINIUPI
 {
-	static Scanner sc = new Scanner(System.in);
-	float balance;
-	int PIN;
-// Generate a random 4-digit PIN for the session
-	int GENPIN()
-	{
-		Random r = new Random();
-		PIN=1000+r.nextInt(9000);
-		System.out.println("YOUR PIN IS : "+PIN);
-		return PIN;
-	}
-// Verify user-entered PIN before allowing transaction
-	boolean AUTHENTICATE()
-	{
-		System.out.println("Enter 4 digit PIN");
-		int a_pin = sc.nextInt();
+	// ===== INPUT & UTILITY OBJECTS =====
 
-		if(PIN==a_pin)
+	static Scanner sc = new Scanner(System.in);
+	static Random r = new Random();
+
+	// ===== USER ACCOUNT DETAILS =====
+
+	long userMobile;
+	int userPIN;
+	int systemOTP;
+	double currentBalance;
+
+	// ===== OTP GENERATION =====
+
+	// Generates a 4-digit OTP for transaction verification
+
+	int generateOTP()
+	{
+		systemOTP = 1000 + r.nextInt(9000);
+		System.out.println("4-digit otp sent to your registered mobile number : "+systemOTP);	 // For simulation/demo purposes
+		return systemOTP;
+	}
+
+	// ===== OTP VALIDATION =====
+
+	// Validates user-entered OTP with generated OTP
+
+	boolean validateOTP()
+	{
+		System.out.println("Enter OTP");
+		int userOTP = sc.nextInt();
+
+		if(userOTP == systemOTP)
 		{
+			System.out.println("OTP Verification Successful");
 			return true;
 		}
-		
 		else
 		{
+			System.out.println("OTP verification failed!");
+			System.out.println("Wrong OTP entered");
 			return false;
 		}
 	}
-// Add amount to balance only if authentication is successful
-	float Deposit(float a)
+
+	// ===== MOBILE VERIFICATION =====
+	// Verifies if entered mobile matches registered mobile
+
+	boolean validateMobile()
 	{
+		System.out.println("Enter Mobile Number");
+		long enteredMobile = sc.nextLong();
 
-		if(AUTHENTICATE())
+		if(enteredMobile == userMobile)
 		{
-			balance+=a;
-			System.out.println("Transaction successful");
-			System.out.println("Current Balance : "+balance);
-			return balance;
+			System.out.println("Mobile number verification successful!");
+			return true;
 		}
-
 		else
 		{
-			System.out.println("Wrong Pin Entered");
-			return balance;
+			System.out.println("Mobile number verification failed!");
+			System.out.println("Incorrect Mobile Number");
+			return false;
 		}
-
-
 	}
-// Check for sufficient balance before deducting amount
-	float Withdraw(float a)
-	{
-		if(AUTHENTICATE())
-		{
-			if(a>balance)
-			{
-				System.out.println("Insufficient funds");
-				return balance;
-			}
 
+	// ===== PIN AUTHENTICATION =====
+	// Authenticates user using 4-digit PIN before operations
+
+	boolean validatePIN()
+	{
+		System.out.println("Enter 4 digit PIN");
+		int enteredPIN = sc.nextInt();
+
+		if(enteredPIN == userPIN)
+		{
+			System.out.println("Authentication Successful!");
+			return true;
+		}
+		else
+		{
+			System.out.println("Authentication failed!");
+			System.out.println("Incorrect PIN");
+			return false;
+		}
+	}
+
+	// ===== BALANCE ENQUIRY =====
+	// Displays current balance after PIN verification
+
+	void checkBalance()
+	{
+		if(validatePIN())
+		{
+			System.out.printf("Available balance : ₹%.2f\n", currentBalance);
+		}
+	}
+
+	// ===== DEPOSIT FUNCTION =====
+	// Requires PIN + Mobile + OTP verification before deposit
+
+	void depositAmount()
+	{
+		if(validatePIN())
+		{
+			System.out.print("Enter deposit amount : ");
+			double depositAmount = sc.nextDouble();
+
+			// Prevent invalid deposits
+
+			if(depositAmount <= 0)
+			{
+				System.out.println("Invalid deposit amount!");
+				return;
+			}
 			else
 			{
-				balance = balance-a;
-				System.out.println("Transaction successful");
-				System.out.println("Current Balance : "+balance);
-				return balance;
+				if(validateMobile())
+				{
+					generateOTP();
+
+					if(validateOTP())
+					{
+						currentBalance = currentBalance + depositAmount;
+						System.out.println("Amount deposited successfully!");
+						System.out.printf("Available balance : ₹%.2f\n", currentBalance);
+						systemOTP = 0; 	// Reset OTP after success
+					}
+					else
+					{
+						System.out.println("Deposit failed!");
+					}
+				}
+				else
+				{
+					System.out.println("Deposit failed!");
+				}
 			}
 		}
 		else
 		{
-			System.out.println("Wrong Pin Entered");
-			return balance;
+			System.out.println("Deposit failed!");
 		}
 	}
-// Display current balance after successful authentication
-	float BalanceEnquiry()
-	{
-		if(AUTHENTICATE())
-		{
-			System.out.println("Current Balance : "+balance);
-			return balance;
-		}
 
-		else
+	// ===== WITHDRAW FUNCTION =====
+	// - Requires PIN authentication
+	// - No OTP for <= 2000
+	// - OTP required for > 2000
+
+	void withdrawAmount()
+	{
+		if(validatePIN())
 		{
-			System.out.println("Wrong Pin Entered");
-			return balance;
+			System.out.print("Enter withdraw amount : ");
+			double withdrawAmount = sc.nextDouble();
+
+			// Prevent invalid input
+
+			if(withdrawAmount <= 0)
+			{
+				System.out.println("Invalid withdraw request!");
+				return;
+			}
+			else if(withdrawAmount > currentBalance)
+			{
+				System.out.println("Insufficient funds!");
+				return;
+			}
+			else
+			{
+				// Small transactions (no OTP)
+
+				if(withdrawAmount <= 2000.00)
+				{
+					currentBalance = currentBalance - withdrawAmount;
+					System.out.println("Amount withdrawn successfully!");
+					System.out.printf("Available balance : ₹%.2f\n", currentBalance);
+				}
+				else
+				{
+					// High-value transaction → OTP required
+
+					if(validateMobile())
+					{
+						generateOTP();
+
+						if(validateOTP())
+						{
+							currentBalance = currentBalance - withdrawAmount;
+							System.out.println("Amount withdrawn successfully!");
+							System.out.printf("Available balance : ₹%.2f\n", currentBalance);
+							systemOTP = 0;
+						}
+						else
+						{
+							System.out.println("Withdraw failed!");
+						}
+					}
+					else
+					{
+						System.out.println("Withdraw failed!");
+					}
+				}
+			}
 		}
 	}
-// Displays menu options and handles user choice using switch-case
-	void Display()
+
+	// ===== MENU DISPLAY =====
+	// Displays options and routes user to selected operation
+
+	void menuDisplay()
 	{
 		System.out.println("Enter your choice");
-		System.out.println("1.Balance Enquiry	2.Deposit     3.Withdraw");
+		System.out.println(" 1. Deposit");
+		System.out.println(" 2. Withdraw");
+		System.out.println(" 3. Balance Enquiry");
+		System.out.println(" Any number to Exit");
 
-		int n = sc.nextInt();
+		int input = sc.nextInt();
 
-		switch (n){
-			case 1 :
-				{
-					BalanceEnquiry();
-					break;
-				}
-			
-			case 2 :
-				{
-					System.out.println("Enter deposit amount");
-					Deposit(sc.nextFloat());
-					break;
-				}
-
-			case 3 :
-				{
-					System.out.println("Enter withdraw amount");
-					Withdraw(sc.nextFloat());
-					break;
-				}
-
-			default :
-				{
-					System.out.println("invalid Input");
-				}
-			}
-	}
-// Repeat transactions until user chooses to exit
-		public static void main(String [] args)
+		switch(input)
 		{
-			MINIUPI x = new MINIUPI();
-			// Generate session PIN at start of program
-			x.GENPIN();
+			case 1:
+				depositAmount();
+				break;
 
-			int a;
-			do
-			{
-				x.Display();
+			case 2:
+				withdrawAmount();
+				break;
 
-				System.out.println("1.New Transaction	2.Exit");
-				a = sc.nextInt();
-			}
-			while(a==1);
-			System.out.println("Thankyou for using our MINI ATM");
+			case 3:
+				checkBalance();
+				break;
+
+			default:
+				System.out.println("Thank you for using our MINI BANK SERVICE!!");
 		}
+	}
+
+	// ===== MAIN METHOD =====
+	// Initializes account and controls transaction loop
+
+	public static void main(String[] args)
+	{
+		MINIUPI obj = new MINIUPI();
+
+		System.out.println("Enter opening balance");
+		obj.currentBalance = sc.nextDouble();
+
+		System.out.println("Enter user mobile number");
+		obj.userMobile = sc.nextLong();
+
+		System.out.println("Set your 4 digit secure PIN");
+		obj.userPIN = sc.nextInt();
+
+		int choice;
+
+		do
+		{
+			obj.menuDisplay();
+
+			System.out.println();
+			System.out.println("Continue");
+			System.out.println("1. Yes    2. No");
+
+			choice = sc.nextInt();
+		}
+		while(choice == 1);
+
+		System.out.println("Thank you for using our MINI BANK SERVICE!!");
+	}
 }
